@@ -10,6 +10,7 @@ from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, HttpUrl, Field
 from contextlib import asynccontextmanager
 import pandas as pd
+from fastapi.middleware.cors import CORSMiddleware
 
 # --- Configuration (Should match training artifacts location) ---
 ARTIFACTS_DIR = 'pytorch_model_artifacts'
@@ -139,6 +140,14 @@ async def lifespan(app: FastAPI):
     print("ML models cleared.")
 
 app = FastAPI(title="URL Safety Predictor", lifespan=lifespan)
+# Enable CORS for frontend interaction (e.g., Streamlit, React)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or specify a list like ["http://localhost:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class URLInput(BaseModel):
     url: str = Field(..., min_length=10, example="https://www.google.com")
